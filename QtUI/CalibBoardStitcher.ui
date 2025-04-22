@@ -1,0 +1,471 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>CalibBoardStitcher</class>
+ <widget class="QMainWindow" name="CalibBoardStitcher">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>1080</width>
+    <height>780</height>
+   </rect>
+  </property>
+  <property name="minimumSize">
+   <size>
+    <width>1080</width>
+    <height>720</height>
+   </size>
+  </property>
+  <property name="windowTitle">
+   <string>CalibBoardStitcher</string>
+  </property>
+  <widget class="QWidget" name="centralWidget">
+   <property name="sizePolicy">
+    <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+     <horstretch>0</horstretch>
+     <verstretch>0</verstretch>
+    </sizepolicy>
+   </property>
+   <property name="minimumSize">
+    <size>
+     <width>1080</width>
+     <height>720</height>
+    </size>
+   </property>
+   <property name="layoutDirection">
+    <enum>Qt::LayoutDirection::LeftToRight</enum>
+   </property>
+   <layout class="QHBoxLayout" name="horizontalLayout_3" stretch="3,0">
+    <item>
+     <layout class="QVBoxLayout" name="verticalLayout">
+      <property name="leftMargin">
+       <number>5</number>
+      </property>
+      <property name="topMargin">
+       <number>5</number>
+      </property>
+      <property name="rightMargin">
+       <number>5</number>
+      </property>
+      <property name="bottomMargin">
+       <number>5</number>
+      </property>
+      <item>
+       <widget class="QGraphicsView" name="mainGraphicsView"/>
+      </item>
+     </layout>
+    </item>
+    <item>
+     <layout class="QVBoxLayout" name="verticalLayout_2">
+      <property name="leftMargin">
+       <number>5</number>
+      </property>
+      <property name="topMargin">
+       <number>0</number>
+      </property>
+      <property name="rightMargin">
+       <number>5</number>
+      </property>
+      <item>
+       <widget class="QTabWidget" name="funcTabView">
+        <property name="minimumSize">
+         <size>
+          <width>320</width>
+          <height>0</height>
+         </size>
+        </property>
+        <property name="maximumSize">
+         <size>
+          <width>16777215</width>
+          <height>240</height>
+         </size>
+        </property>
+        <property name="currentIndex">
+         <number>1</number>
+        </property>
+        <widget class="QWidget" name="tab">
+         <attribute name="title">
+          <string>标定板生成</string>
+         </attribute>
+         <widget class="QPushButton" name="genCalibBoardImageButton">
+          <property name="geometry">
+           <rect>
+            <x>10</x>
+            <y>170</y>
+            <width>295</width>
+            <height>30</height>
+           </rect>
+          </property>
+          <property name="text">
+           <string>生成标定板图像</string>
+          </property>
+         </widget>
+         <widget class="QLabel" name="label_3">
+          <property name="geometry">
+           <rect>
+            <x>10</x>
+            <y>10</y>
+            <width>150</width>
+            <height>30</height>
+           </rect>
+          </property>
+          <property name="text">
+           <string>棋盘格列数（宽度方向）：</string>
+          </property>
+         </widget>
+         <widget class="QSpinBox" name="rowCountSpinBox">
+          <property name="geometry">
+           <rect>
+            <x>220</x>
+            <y>50</y>
+            <width>85</width>
+            <height>30</height>
+           </rect>
+          </property>
+          <property name="minimumSize">
+           <size>
+            <width>85</width>
+            <height>30</height>
+           </size>
+          </property>
+          <property name="maximum">
+           <number>999</number>
+          </property>
+          <property name="value">
+           <number>30</number>
+          </property>
+         </widget>
+         <widget class="QSpinBox" name="colCountSpinBox">
+          <property name="geometry">
+           <rect>
+            <x>220</x>
+            <y>10</y>
+            <width>85</width>
+            <height>30</height>
+           </rect>
+          </property>
+          <property name="minimumSize">
+           <size>
+            <width>85</width>
+            <height>30</height>
+           </size>
+          </property>
+          <property name="maximum">
+           <number>999</number>
+          </property>
+          <property name="value">
+           <number>40</number>
+          </property>
+         </widget>
+         <widget class="QLabel" name="label_2">
+          <property name="geometry">
+           <rect>
+            <x>10</x>
+            <y>50</y>
+            <width>150</width>
+            <height>30</height>
+           </rect>
+          </property>
+          <property name="text">
+           <string>棋盘格行数（高度方向）：</string>
+          </property>
+         </widget>
+         <widget class="QLabel" name="label_4">
+          <property name="geometry">
+           <rect>
+            <x>10</x>
+            <y>130</y>
+            <width>150</width>
+            <height>30</height>
+           </rect>
+          </property>
+          <property name="text">
+           <string>二维码边框大小：</string>
+          </property>
+         </widget>
+         <widget class="QSpinBox" name="qrPixelSizeSpinBox">
+          <property name="geometry">
+           <rect>
+            <x>220</x>
+            <y>90</y>
+            <width>85</width>
+            <height>30</height>
+           </rect>
+          </property>
+          <property name="minimumSize">
+           <size>
+            <width>85</width>
+            <height>30</height>
+           </size>
+          </property>
+          <property name="maximum">
+           <number>20</number>
+          </property>
+          <property name="value">
+           <number>7</number>
+          </property>
+         </widget>
+         <widget class="QSpinBox" name="qrBoarderSpinBox">
+          <property name="geometry">
+           <rect>
+            <x>220</x>
+            <y>130</y>
+            <width>85</width>
+            <height>30</height>
+           </rect>
+          </property>
+          <property name="minimumSize">
+           <size>
+            <width>85</width>
+            <height>30</height>
+           </size>
+          </property>
+          <property name="minimum">
+           <number>1</number>
+          </property>
+          <property name="maximum">
+           <number>20</number>
+          </property>
+          <property name="value">
+           <number>3</number>
+          </property>
+         </widget>
+         <widget class="QLabel" name="label_5">
+          <property name="geometry">
+           <rect>
+            <x>10</x>
+            <y>90</y>
+            <width>150</width>
+            <height>30</height>
+           </rect>
+          </property>
+          <property name="text">
+           <string>二维码像素点大小：</string>
+          </property>
+         </widget>
+        </widget>
+        <widget class="QWidget" name="tab_2">
+         <attribute name="title">
+          <string>标定板标定</string>
+         </attribute>
+         <widget class="QPushButton" name="loadSubImageSequenceButton">
+          <property name="geometry">
+           <rect>
+            <x>210</x>
+            <y>10</y>
+            <width>95</width>
+            <height>30</height>
+           </rect>
+          </property>
+          <property name="text">
+           <string>加载子图像序列</string>
+          </property>
+         </widget>
+         <widget class="QLineEdit" name="subImageFolderPath">
+          <property name="enabled">
+           <bool>false</bool>
+          </property>
+          <property name="geometry">
+           <rect>
+            <x>10</x>
+            <y>10</y>
+            <width>190</width>
+            <height>30</height>
+           </rect>
+          </property>
+         </widget>
+         <widget class="QPushButton" name="execAutoMatchButton">
+          <property name="geometry">
+           <rect>
+            <x>10</x>
+            <y>90</y>
+            <width>295</width>
+            <height>30</height>
+           </rect>
+          </property>
+          <property name="text">
+           <string>执行自动匹配</string>
+          </property>
+         </widget>
+         <widget class="QComboBox" name="stitchMethodComboBox">
+          <property name="geometry">
+           <rect>
+            <x>10</x>
+            <y>170</y>
+            <width>190</width>
+            <height>30</height>
+           </rect>
+          </property>
+         </widget>
+         <widget class="QPushButton" name="importCalibResultButton">
+          <property name="geometry">
+           <rect>
+            <x>210</x>
+            <y>50</y>
+            <width>95</width>
+            <height>30</height>
+           </rect>
+          </property>
+          <property name="text">
+           <string>导入标定结果</string>
+          </property>
+         </widget>
+         <widget class="QLineEdit" name="lineEdit_3">
+          <property name="enabled">
+           <bool>false</bool>
+          </property>
+          <property name="geometry">
+           <rect>
+            <x>10</x>
+            <y>50</y>
+            <width>190</width>
+            <height>30</height>
+           </rect>
+          </property>
+         </widget>
+         <widget class="QLabel" name="label_7">
+          <property name="geometry">
+           <rect>
+            <x>10</x>
+            <y>130</y>
+            <width>295</width>
+            <height>30</height>
+           </rect>
+          </property>
+          <property name="text">
+           <string>选择拼接方式（仅影响预览，不影响自动匹配）：</string>
+          </property>
+         </widget>
+         <widget class="QPushButton" name="importCalibResultButton_2">
+          <property name="geometry">
+           <rect>
+            <x>210</x>
+            <y>170</y>
+            <width>95</width>
+            <height>30</height>
+           </rect>
+          </property>
+          <property name="text">
+           <string>更新拼接方式</string>
+          </property>
+         </widget>
+        </widget>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="label">
+        <property name="text">
+         <string>子图像序列</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QTableWidget" name="tableWidget">
+        <property name="verticalScrollBarPolicy">
+         <enum>Qt::ScrollBarPolicy::ScrollBarAlwaysOn</enum>
+        </property>
+        <attribute name="verticalHeaderDefaultSectionSize">
+         <number>64</number>
+        </attribute>
+        <column>
+         <property name="text">
+          <string>图像ID</string>
+         </property>
+        </column>
+        <column>
+         <property name="text">
+          <string>使能</string>
+         </property>
+        </column>
+        <column>
+         <property name="text">
+          <string>图像</string>
+         </property>
+        </column>
+        <column>
+         <property name="text">
+          <string>顶点对</string>
+         </property>
+        </column>
+       </widget>
+      </item>
+      <item>
+       <layout class="QHBoxLayout" name="horizontalLayout">
+        <property name="leftMargin">
+         <number>5</number>
+        </property>
+        <property name="topMargin">
+         <number>0</number>
+        </property>
+        <property name="rightMargin">
+         <number>5</number>
+        </property>
+        <property name="bottomMargin">
+         <number>0</number>
+        </property>
+        <item>
+         <widget class="QLabel" name="label_6">
+          <property name="text">
+           <string>运行进度：</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QProgressBar" name="progressBar">
+          <property name="value">
+           <number>0</number>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+      <item>
+       <widget class="QPushButton" name="saveCalibResultButton">
+        <property name="minimumSize">
+         <size>
+          <width>0</width>
+          <height>30</height>
+         </size>
+        </property>
+        <property name="text">
+         <string>保存标定结果</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </item>
+   </layout>
+  </widget>
+  <widget class="QMenuBar" name="menuBar">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>1080</width>
+     <height>21</height>
+    </rect>
+   </property>
+  </widget>
+  <widget class="QToolBar" name="mainToolBar">
+   <attribute name="toolBarArea">
+    <enum>TopToolBarArea</enum>
+   </attribute>
+   <attribute name="toolBarBreak">
+    <bool>false</bool>
+   </attribute>
+  </widget>
+  <action name="actionDEBUG">
+   <property name="text">
+    <string>DEBUG</string>
+   </property>
+  </action>
+  <action name="actionINFO">
+   <property name="text">
+    <string>INFO</string>
+   </property>
+  </action>
+ </widget>
+ <layoutdefault spacing="6" margin="11"/>
+ <resources/>
+ <connections/>
+</ui>
