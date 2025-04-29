@@ -188,7 +188,7 @@ class Ui_CalibBoardStitcher(object):
         item = self.tableWidget.horizontalHeaderItem(0)
         item.setText(_translate("CalibBoardStitcher", "图像ID"))
         item = self.tableWidget.horizontalHeaderItem(1)
-        item.setText(_translate("CalibBoardStitcher", "匹配点数"))
+        item.setText(_translate("CalibBoardStitcher", "匹配点对数"))
         item = self.tableWidget.horizontalHeaderItem(2)
         item.setText(_translate("CalibBoardStitcher", "图像"))
         item = self.tableWidget.horizontalHeaderItem(3)

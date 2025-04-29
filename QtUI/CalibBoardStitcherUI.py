@@ -174,7 +174,7 @@ class CalibBoardStitcherUI(Ui_CalibBoardStitcher, QWidget):
             img_id=id,
             img_path=img_path
         )
-        sub_img.set_matched_point_changed_callback(self._matched_points_changed)
+        #sub_img.set_matched_point_changed_callback(self._matched_points_changed)
         sub_img.set_add_new_matched_point_callback(self._add_new_matched_point)
 
         with self._sub_image_lock:
@@ -460,6 +460,7 @@ class CalibBoardStitcherUI(Ui_CalibBoardStitcher, QWidget):
         子图被选中的回调函数
         :param img_id: 子图ID
         """
+        edit_finished = False
         # 切换子图状态
         with self._sub_image_lock:
             curr_status = self._sub_image_items[img_id].get_status()
@@ -469,10 +470,15 @@ class CalibBoardStitcherUI(Ui_CalibBoardStitcher, QWidget):
                     self._sub_image_items[img].switch_to(
                         SubImageStatus.HIDE if img!= img_id else SubImageStatus.SHOW_ORIGINAL_MOVABLE
                     )
-            else:
-                # 退出预览模式
+            elif curr_status == SubImageStatus.SHOW_ORIGINAL_MOVABLE:
+                # 取消选中，退出编辑模式
                 for img in self._sub_image_items.keys():
                     self._sub_image_items[img].switch_to(SubImageStatus.SHOW_TRANSFORMED_LOCKED)
+                matched_points = self._sub_image_items[img_id].get_matched_points()
+                edit_finished = True
+
+        if edit_finished:
+            self._matched_points_changed(img_id, matched_points)
         self._main_scene.update()
 
     def _matched_points_changed(self, img_id: str, matched_points: list[MatchedPoint]) -> None:
