@@ -46,6 +46,7 @@ class CalibBoardStitcherUI(Ui_CalibBoardStitcher, QWidget):
         # 回调函数
         self._btn_clicked_cb_map = {}
         self._matched_points_changed_callback = None
+        self._add_new_matched_point_callback = None
 
         # 图像Item
         ## 标定板图像Item
@@ -73,6 +74,8 @@ class CalibBoardStitcherUI(Ui_CalibBoardStitcher, QWidget):
 
         # 初始化tableWidget
         self.tableWidget.setIconSize(QSize(100, 100))
+        self.tableWidget.setSortingEnabled(True)
+        self.tableWidget.itemDoubleClicked.connect(self._table_widget_item_double_clicked_slot)
 
         # 添加按钮槽函数
         self.genCalibBoardImageButton.clicked.connect(
@@ -172,6 +175,7 @@ class CalibBoardStitcherUI(Ui_CalibBoardStitcher, QWidget):
             img_path=img_path
         )
         sub_img.set_matched_point_changed_callback(self._matched_points_changed)
+        sub_img.set_add_new_matched_point_callback(self._add_new_matched_point)
 
         with self._sub_image_lock:
             self._sub_image_items[id] = sub_img
@@ -285,7 +289,6 @@ class CalibBoardStitcherUI(Ui_CalibBoardStitcher, QWidget):
             with self._select_save_file_lock:
                 return self._selected_save_file
 
-
     def set_matched_points_changed_callback(self, callback: Callable[[str, list[MatchedPoint]], None]):
         """
         设置匹配点变化回调函数
@@ -293,6 +296,14 @@ class CalibBoardStitcherUI(Ui_CalibBoardStitcher, QWidget):
         :param callback: def callback(img_id: str, matched_points: list[MatchedPoint]) -> None
         """
         self._matched_points_changed_callback = callback
+
+    def set_add_new_matched_point_callback(self, callback: Callable[[str], None]):
+        """
+        设置手动添加新匹配点的回调函数
+
+        :param callback: def callback(img_id: str) -> None
+        """
+        self._add_new_matched_point_callback = callback
 
 
     @pyqtSlot(ButtonClickedEvent)
@@ -350,6 +361,12 @@ class CalibBoardStitcherUI(Ui_CalibBoardStitcher, QWidget):
             sub_img_item.switch_to(sub_img_item.status)
         self._main_scene.update()
 
+        # 更新 "子图像序列" 区域状态
+        for i in range(self.tableWidget.rowCount()):
+            if self.tableWidget.item(i, 0).text() == img_id:
+                ## 更新匹配点数
+                self.tableWidget.item(i, 1).setText(str(len(self.get_sub_image_matched_points(img_id))))
+
 
     @pyqtSlot(SubImage)
     def _add_sub_image_slot(self, sub_img: SubImage):
@@ -363,11 +380,14 @@ class CalibBoardStitcherUI(Ui_CalibBoardStitcher, QWidget):
 
         # 设置"子图像序列"列表区域内容
         self.tableWidget.setItem(row_id, 0, QTableWidgetItem(sub_img.img_id))
-        self.tableWidget.setItem(row_id, 1, QTableWidgetItem(str(sub_img.enabled)))
+        self.tableWidget.setItem(row_id, 1, QTableWidgetItem(str(len(sub_img.get_matched_points()))))
         item = QTableWidgetItem()
         item.setIcon(QIcon(sub_img.thumbnail_pixmap))
         self.tableWidget.setItem(row_id, 2, item)
         self.tableWidget.setItem(row_id, 3, QTableWidgetItem("[]"))
+        ## 设置不可编辑
+        for i in range(3):
+            self.tableWidget.item(row_id, i).setFlags(Qt.ItemFlag.ItemIsSelectable | Qt.ItemFlag.ItemIsEnabled)
 
         # 向主画布中添加子图像
         self._main_scene.addItem(sub_img.get_original_pixmap_item())
@@ -394,6 +414,7 @@ class CalibBoardStitcherUI(Ui_CalibBoardStitcher, QWidget):
                     matched_points=matched_points,
                     scene=self._main_scene
                 )
+        self._main_scene.update()
 
 
     @pyqtSlot(str, str)
@@ -419,6 +440,19 @@ class CalibBoardStitcherUI(Ui_CalibBoardStitcher, QWidget):
             if not file_name.endswith(selected_filter):
                 file_name += selected_filter
             self._selected_save_file = file_name
+
+    @pyqtSlot(QTableWidgetItem)
+    def _table_widget_item_double_clicked_slot(self, item: QTableWidgetItem):
+        """
+        "子图像序列" tableWidget中元素被双击的槽函数
+
+        :param item:
+        :return:
+        """
+        row = item.row()
+        col = item.column()
+        img_id = self.tableWidget.item(row, 0).text()
+        self._sub_image_selected(img_id)
 
 
     def _sub_image_selected(self, img_id: str):
@@ -447,3 +481,13 @@ class CalibBoardStitcherUI(Ui_CalibBoardStitcher, QWidget):
         """
         if self._matched_points_changed_callback is not None:
             self._matched_points_changed_callback(img_id, matched_points)
+
+    def _add_new_matched_point(self, img_id: str):
+        """
+        手动添加新匹配点的回调函数
+
+        :param img_id: 子图像ID
+        """
+        if self._add_new_matched_point_callback is not None:
+            self._add_new_matched_point_callback(img_id)
+            self._update_sub_image_signal.emit(img_id)

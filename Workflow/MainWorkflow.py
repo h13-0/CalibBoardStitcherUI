@@ -33,6 +33,9 @@ class MainWorkflow:
         # 子图像序列
         self._sub_image_paths = {}
 
+        # 配置UI回调函数
+        self._ui.set_add_new_matched_point_callback(self._add_new_matched_point)
+
     def _gen_calib_board_img_task(self):
         """
         生成标定板图像的task
@@ -96,15 +99,50 @@ class MainWorkflow:
         # 更新子图仿射图像
         img = cv2.imread(self._sub_image_paths[img_id])
 
-        start = time.perf_counter()
-        transformed, box = self._stitcher.stitch_full_gen_wrapped_partial(img, matched_points)
-        end = time.perf_counter()
-        logging.info("stitcher.stitch_full_gen_wrapped_partial() spend: {}".format(end - start))
+        if len(matched_points) >= 3:
+            start = time.perf_counter()
+            transformed, box = self._stitcher.stitch_full_gen_wrapped_partial(img, matched_points)
+            end = time.perf_counter()
+            logging.info("stitcher.stitch_full_gen_wrapped_partial() spend: {}".format(end - start))
 
-        self._ui.update_transformed_sub_img(img_id, transformed)
-        self._ui.set_sub_image_pos(img_id, (box.lt[0], box.lt[1]))
+            self._ui.update_transformed_sub_img(img_id, transformed)
+            self._ui.set_sub_image_pos(img_id, (box.lt[0], box.lt[1]))
+        else:
+            pass
 
-        pass
+
+    def _add_new_matched_point(self, img_id: str) -> None:
+        """
+        添加新的匹配点的回调函数
+
+        :param img_id: 子图像ID
+        """
+        matched_points = self._ui.get_sub_image_matched_points(img_id)
+        if len(matched_points) > 0:
+            mean_cb_pos = (0, 0)
+            mean_img_pos = (0, 0)
+            for point in matched_points:
+                mean_cb_pos = (
+                    mean_cb_pos[0] + point.cb_point[0],
+                    mean_cb_pos[1] + point.cb_point[1]
+                )
+                mean_img_pos = (
+                    mean_img_pos[0] + point.img_point[0],
+                    mean_img_pos[1] + point.img_point[1]
+                )
+            matched_point_nums = len(matched_points)
+            mean_cb_pos = (mean_cb_pos[0] / matched_point_nums, mean_cb_pos[1] / matched_point_nums)
+            mean_img_pos = (mean_img_pos[0] / matched_point_nums, mean_img_pos[1] / matched_point_nums)
+        else:
+            mean_cb_pos = (0, 0)
+            mean_img_pos = (0, 0)
+        new_matched_point = MatchedPoint(
+            img_id,
+            mean_cb_pos,
+            mean_img_pos
+        )
+        matched_points.append(new_matched_point)
+        self._ui.set_sub_image_matched_points(img_id, matched_points)
 
 
     def _exec_auto_match_task(self):
@@ -123,7 +161,7 @@ class MainWorkflow:
             if self._stitcher is None:
                 self._stitcher = Stitcher.from_qr_img(img)
                 if self._stitcher:
-                    calib_result = CalibResult(board_obj=self._stitcher.board_cfg)
+                    calib_result = CalibResult(board_obj=self._stitcher.board_obj)
                     board_obj = calib_result.get_calib_board_obj()
                     break
 

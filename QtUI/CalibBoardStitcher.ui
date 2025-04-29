@@ -374,7 +374,7 @@
         </column>
         <column>
          <property name="text">
-          <string>使能</string>
+          <string>匹配点对数</string>
          </property>
         </column>
         <column>

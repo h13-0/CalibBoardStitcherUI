@@ -1,4 +1,4 @@
-# Form implementation generated from reading ui file 'Stitcher.ui'
+# Form implementation generated from reading ui file 'CalibBoardStitcher.ui'
 #
 # Created by: PyQt6 UI code generator 6.8.1
 #
@@ -11,7 +11,7 @@ from PyQt6 import QtCore, QtGui, QtWidgets
 
 class Ui_CalibBoardStitcher(object):
     def setupUi(self, CalibBoardStitcher):
-        CalibBoardStitcher.setObjectName("Stitcher")
+        CalibBoardStitcher.setObjectName("CalibBoardStitcher")
         CalibBoardStitcher.resize(1080, 780)
         CalibBoardStitcher.setMinimumSize(QtCore.QSize(1080, 720))
         self.centralWidget = QtWidgets.QWidget(parent=CalibBoardStitcher)
@@ -171,29 +171,29 @@ class Ui_CalibBoardStitcher(object):
 
     def retranslateUi(self, CalibBoardStitcher):
         _translate = QtCore.QCoreApplication.translate
-        CalibBoardStitcher.setWindowTitle(_translate("Stitcher", "Stitcher"))
-        self.genCalibBoardImageButton.setText(_translate("Stitcher", "生成标定板图像"))
-        self.label_3.setText(_translate("Stitcher", "棋盘格列数（宽度方向）："))
-        self.label_2.setText(_translate("Stitcher", "棋盘格行数（高度方向）："))
-        self.label_4.setText(_translate("Stitcher", "二维码边框大小："))
-        self.label_5.setText(_translate("Stitcher", "二维码像素点大小："))
-        self.funcTabView.setTabText(self.funcTabView.indexOf(self.tab), _translate("Stitcher", "标定板生成"))
-        self.loadSubImageSequenceButton.setText(_translate("Stitcher", "加载子图像序列"))
-        self.execAutoMatchButton.setText(_translate("Stitcher", "执行自动匹配"))
-        self.importCalibResultButton.setText(_translate("Stitcher", "导入标定结果"))
-        self.label_7.setText(_translate("Stitcher", "选择拼接方式（仅影响预览，不影响自动匹配）："))
-        self.importCalibResultButton_2.setText(_translate("Stitcher", "更新拼接方式"))
-        self.funcTabView.setTabText(self.funcTabView.indexOf(self.tab_2), _translate("Stitcher", "标定板标定"))
-        self.label.setText(_translate("Stitcher", "子图像序列"))
+        CalibBoardStitcher.setWindowTitle(_translate("CalibBoardStitcher", "CalibBoardStitcher"))
+        self.genCalibBoardImageButton.setText(_translate("CalibBoardStitcher", "生成标定板图像"))
+        self.label_3.setText(_translate("CalibBoardStitcher", "棋盘格列数（宽度方向）："))
+        self.label_2.setText(_translate("CalibBoardStitcher", "棋盘格行数（高度方向）："))
+        self.label_4.setText(_translate("CalibBoardStitcher", "二维码边框大小："))
+        self.label_5.setText(_translate("CalibBoardStitcher", "二维码像素点大小："))
+        self.funcTabView.setTabText(self.funcTabView.indexOf(self.tab), _translate("CalibBoardStitcher", "标定板生成"))
+        self.loadSubImageSequenceButton.setText(_translate("CalibBoardStitcher", "加载子图像序列"))
+        self.execAutoMatchButton.setText(_translate("CalibBoardStitcher", "执行自动匹配"))
+        self.importCalibResultButton.setText(_translate("CalibBoardStitcher", "导入标定结果"))
+        self.label_7.setText(_translate("CalibBoardStitcher", "选择拼接方式（仅影响预览，不影响自动匹配）："))
+        self.importCalibResultButton_2.setText(_translate("CalibBoardStitcher", "更新拼接方式"))
+        self.funcTabView.setTabText(self.funcTabView.indexOf(self.tab_2), _translate("CalibBoardStitcher", "标定板标定"))
+        self.label.setText(_translate("CalibBoardStitcher", "子图像序列"))
         item = self.tableWidget.horizontalHeaderItem(0)
-        item.setText(_translate("Stitcher", "图像ID"))
+        item.setText(_translate("CalibBoardStitcher", "图像ID"))
         item = self.tableWidget.horizontalHeaderItem(1)
-        item.setText(_translate("Stitcher", "使能"))
+        item.setText(_translate("CalibBoardStitcher", "匹配点数"))
         item = self.tableWidget.horizontalHeaderItem(2)
-        item.setText(_translate("Stitcher", "图像"))
+        item.setText(_translate("CalibBoardStitcher", "图像"))
         item = self.tableWidget.horizontalHeaderItem(3)
-        item.setText(_translate("Stitcher", "顶点对"))
-        self.label_6.setText(_translate("Stitcher", "运行进度："))
-        self.saveCalibResultButton.setText(_translate("Stitcher", "保存标定结果"))
-        self.actionDEBUG.setText(_translate("Stitcher", "DEBUG"))
-        self.actionINFO.setText(_translate("Stitcher", "INFO"))
+        item.setText(_translate("CalibBoardStitcher", "顶点对"))
+        self.label_6.setText(_translate("CalibBoardStitcher", "运行进度："))
+        self.saveCalibResultButton.setText(_translate("CalibBoardStitcher", "保存标定结果"))
+        self.actionDEBUG.setText(_translate("CalibBoardStitcher", "DEBUG"))
+        self.actionINFO.setText(_translate("CalibBoardStitcher", "INFO"))

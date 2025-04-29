@@ -37,6 +37,7 @@ class SubImage:
         self._original_draggable_pixmap_item = SubImagePixmapItem(img_id, QPixmap(q_image))
         self._original_draggable_pixmap_item.set_double_clicked_callback(self._double_clicked)
         self._original_draggable_pixmap_item.set_matched_point_changed_callback(self._matched_point_changed)
+        self._original_draggable_pixmap_item.add_menu_options("添加匹配点", self._add_new_matched_point)
 
         self._transformed_draggable_pixmap_item = SubImagePixmapItem(img_id, QPixmap())
         self._transformed_draggable_pixmap_item.set_double_clicked_callback(self._double_clicked)
@@ -47,6 +48,7 @@ class SubImage:
         self.status = SubImageStatus.SHOW_ORIGINAL_LOCKED
         self._double_clicked_callback = None
         self._matched_point_changed_callback = None
+        self._add_new_matched_point_callback = None
 
     def get_original_pixmap_item(self) -> SubImagePixmapItem:
         """
@@ -107,6 +109,14 @@ class SubImage:
         """
         self._matched_point_changed_callback = callback
 
+    def set_add_new_matched_point_callback(self, callback: Callable[[str], None]):
+        """
+        设置手动添加新匹配点的回调函数
+
+        :param callback: def callback(img_id: str) -> None
+        """
+        self._add_new_matched_point_callback = callback
+
     def switch_to(self, status: SubImageStatus):
         """
         切换子图像对象的状态
@@ -141,6 +151,10 @@ class SubImage:
     def _double_clicked(self):
         if self._double_clicked_callback is not None:
             self._double_clicked_callback()
+
+    def _add_new_matched_point(self):
+        if self._add_new_matched_point_callback is not None:
+            self._add_new_matched_point_callback(self.img_id)
 
     def _matched_point_changed(self, img_id: str, matched_points: list[MatchedPoint]) -> None:
         """

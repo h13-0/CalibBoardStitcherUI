@@ -200,3 +200,17 @@ class MatchedPointWidget(QWidget):
         self.cb_point.setVisible(visible)
         self.sub_img_point.setVisible(visible)
         self.line.setVisible(visible)
+
+    def remove(self):
+        """
+        删除该节点
+
+        :return:
+        """
+        self._scene.removeItem(self.line)
+        self.cb_point.setParentItem(None)
+        self.sub_img_point.setParentItem(None)
+        self.line = None
+        self.cb_point = None
+        self.sub_img_point = None
+

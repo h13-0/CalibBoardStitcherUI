@@ -1,7 +1,8 @@
 from typing import Callable
 
 from PyQt6.QtCore import Qt, QPointF
-from PyQt6.QtWidgets import QGraphicsPixmapItem, QGraphicsScene
+from PyQt6.QtGui import QAction
+from PyQt6.QtWidgets import QGraphicsPixmapItem, QGraphicsScene, QMenu
 
 from CalibBoardStitcher.CalibResult import MatchedPoint
 from QtUI.Widgets.MatchedPointWidget import MatchedPointWidget
@@ -18,6 +19,7 @@ class SubImagePixmapItem(QGraphicsPixmapItem):
         self._double_clicked_callback = None
         self._matched_point_widgets = []
         self._matched_point_changed_callback = None
+        self._menu_options = {}
 
     def lock(self):
         """
@@ -68,7 +70,10 @@ class SubImagePixmapItem(QGraphicsPixmapItem):
         :param matched_points: 匹配点列表
         :param scene: 子图像和标定板图像所处于的QGraphicsScene
         """
-
+        # 清空原匹配点列表
+        for widget in self._matched_point_widgets:
+            widget.remove()
+        self._matched_point_widgets = []
         for matched_point in matched_points:
             widget = MatchedPointWidget(
                 calib_board=calib_board,
@@ -78,9 +83,7 @@ class SubImagePixmapItem(QGraphicsPixmapItem):
                 scene=scene
             )
             widget.set_changed_callback(self._matched_point_changed)
-            self._matched_point_widgets.append(
-                widget
-            )
+            self._matched_point_widgets.append(widget)
 
     def get_matched_points(self) -> list[MatchedPoint]:
         """
@@ -101,6 +104,36 @@ class SubImagePixmapItem(QGraphicsPixmapItem):
         if self._double_clicked_callback is not None:
             self._double_clicked_callback()
         event.accept()
+
+    def add_menu_options(self, option: str, callback: Callable):
+        """
+        为当前PixmapItem添加右键菜单
+
+        :param option: 菜单选项名
+        :param callback: 回调函数
+        """
+        self._menu_options[option] = callback
+
+
+    def contextMenuEvent(self, event):
+        """
+        右键菜单事件
+
+        :param event:
+        :return:
+        """
+        if len(self._menu_options) > 0:
+            menu = QMenu()
+
+            for option in self._menu_options.keys():
+                action = QAction(text=option)
+                action.triggered.connect(self._menu_options[option])
+                menu.addAction(action)
+
+            # 在鼠标位置显示菜单
+            menu.exec(event.screenPos())
+            event.accept()  # 标记事件已处理
+
 
     def _matched_point_changed(self):
         if self._matched_point_changed_callback is not None:
