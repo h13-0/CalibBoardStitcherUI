@@ -1,10 +1,12 @@
 from typing import Callable
 
-from PyQt6.QtCore import Qt, QPointF
+from PyQt6.QtCore import Qt, QPointF, QPoint
 from PyQt6.QtGui import QAction
 from PyQt6.QtWidgets import QGraphicsPixmapItem, QGraphicsScene, QMenu
 
 from CalibBoardStitcher.CalibResult import MatchedPoint
+from PyQt6.uic.Compiler.qtproxies import QtWidgets
+
 from QtUI.Widgets.MatchedPointWidget import MatchedPointWidget
 
 
@@ -20,6 +22,7 @@ class SubImagePixmapItem(QGraphicsPixmapItem):
         self._matched_point_widgets = []
         self._matched_point_changed_callback = None
         self._menu_options = {}
+        self._menu_pos = (0, 0)
 
     def lock(self):
         """
@@ -105,12 +108,12 @@ class SubImagePixmapItem(QGraphicsPixmapItem):
             self._double_clicked_callback()
         event.accept()
 
-    def add_menu_options(self, option: str, callback: Callable):
+    def add_menu_options(self, option: str, callback: Callable[[tuple[float, float]], None]):
         """
         为当前PixmapItem添加右键菜单
 
         :param option: 菜单选项名
-        :param callback: 回调函数
+        :param callback: 回调函数，原型为：def callback(pos: tuple[float, float]) -> None
         """
         self._menu_options[option] = callback
 
@@ -124,15 +127,17 @@ class SubImagePixmapItem(QGraphicsPixmapItem):
         """
         if len(self._menu_options) > 0:
             menu = QMenu()
+            if isinstance(event.pos(), QPointF):
+                self._menu_pos = event.pos()
 
-            for option in self._menu_options.keys():
-                action = QAction(text=option)
-                action.triggered.connect(self._menu_options[option])
-                menu.addAction(action)
+                for option in self._menu_options.keys():
+                    action = QAction(text=option)
+                    action.triggered.connect(lambda : self._menu_options[option]((self._menu_pos.x(), self._menu_pos.y())))
+                    menu.addAction(action)
 
-            # 在鼠标位置显示菜单
-            menu.exec(event.screenPos())
-            event.accept()  # 标记事件已处理
+                # 在鼠标位置显示菜单
+                menu.exec(event.screenPos())
+                event.accept()  # 标记事件已处理
 
 
     def _matched_point_changed(self):

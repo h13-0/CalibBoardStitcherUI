@@ -14,6 +14,18 @@ from QtUI.SubImage import SubImageStatus
 from CalibBoardStitcher.Stitcher import Stitcher
 from CalibBoardStitcher.Elements import CalibBoardObj
 
+class ImageInfo:
+    def __init__(self, path: str):
+        self.path = path
+        self._shape = None
+
+    @property
+    def shape(self):
+        if self._shape is None:
+            self._shape = cv2.imread(self.path).shape
+        return self._shape
+
+
 class MainWorkflow:
     def __init__(self, ui:CalibBoardStitcherUI, stop_event:threading.Event):
         self._ui = ui
@@ -31,7 +43,7 @@ class MainWorkflow:
         self._board_img = None
 
         # 子图像序列
-        self._sub_image_paths = {}
+        self._sub_image_infos = {}
 
         # 配置UI回调函数
         self._ui.set_add_new_matched_point_callback(self._add_new_matched_point)
@@ -66,7 +78,7 @@ class MainWorkflow:
         :param folder: 文件夹路径
         """
         self._ui.set_progress_bar_value(0)
-        self._sub_image_paths = {}
+        self._sub_image_infos = {}
 
         if folder is None or not os.path.isdir(folder):
             logging.error("No folder selected.")
@@ -82,7 +94,7 @@ class MainWorkflow:
                 self._ui.add_sub_image(file_name, file_path)
                 self._ui.set_sub_image_status(file_name, SubImageStatus.HIDE)
                 self._ui.set_progress_bar_value(int((i + 1) / file_num * 100))
-                self._sub_image_paths[file_name] = file_path
+                self._sub_image_infos[file_name] = ImageInfo(file_path)
             except Exception as e:
                 logging.error(f"load image: {file_path} failed with msg: {str(e)}")
             if self._stop_event.is_set():
@@ -97,7 +109,7 @@ class MainWorkflow:
         :param matched_points: 新的匹配点
         """
         # 更新子图仿射图像
-        img = cv2.imread(self._sub_image_paths[img_id])
+        img = cv2.imread(self._sub_image_infos[img_id].path)
 
         if len(matched_points) >= 3:
             start = time.perf_counter()
@@ -111,7 +123,7 @@ class MainWorkflow:
             pass
 
 
-    def _add_new_matched_point(self, img_id: str) -> None:
+    def _add_new_matched_point(self, img_id: str, pos: tuple[float, float]) -> None:
         """
         添加新的匹配点的回调函数
 
@@ -120,26 +132,19 @@ class MainWorkflow:
         matched_points = self._ui.get_sub_image_matched_points(img_id)
         if len(matched_points) > 0:
             mean_cb_pos = (0, 0)
-            mean_img_pos = (0, 0)
             for point in matched_points:
                 mean_cb_pos = (
                     mean_cb_pos[0] + point.cb_point[0],
                     mean_cb_pos[1] + point.cb_point[1]
                 )
-                mean_img_pos = (
-                    mean_img_pos[0] + point.img_point[0],
-                    mean_img_pos[1] + point.img_point[1]
-                )
             matched_point_nums = len(matched_points)
             mean_cb_pos = (mean_cb_pos[0] / matched_point_nums, mean_cb_pos[1] / matched_point_nums)
-            mean_img_pos = (mean_img_pos[0] / matched_point_nums, mean_img_pos[1] / matched_point_nums)
         else:
             mean_cb_pos = (0, 0)
-            mean_img_pos = (0, 0)
         new_matched_point = MatchedPoint(
             img_id,
             mean_cb_pos,
-            mean_img_pos
+            pos
         )
         matched_points.append(new_matched_point)
         self._ui.set_sub_image_matched_points(img_id, matched_points)
@@ -153,11 +158,11 @@ class MainWorkflow:
 
         calib_result = None
         board_obj = None
-        img_nums = len(self._sub_image_paths)
+        img_nums = len(self._sub_image_infos)
 
         # 尝试寻找图像中的二维码，并获取配置信息
-        for file_path in self._sub_image_paths.values():
-            img = cv2.imread(file_path)
+        for img_info in self._sub_image_infos.values():
+            img = cv2.imread(img_info.path)
             if self._stitcher is None:
                 self._stitcher = Stitcher.from_qr_img(img)
                 if self._stitcher:
@@ -167,9 +172,9 @@ class MainWorkflow:
 
         # 执行标定算法
         i = 0
-        for file_path in self._sub_image_paths.values():
-            img_id = os.path.basename(file_path)
-            img = cv2.imread(file_path)
+        for img_info in self._sub_image_infos.values():
+            img_id = os.path.basename(img_info.path)
+            img = cv2.imread(img_info.path)
 
             start = time.perf_counter()
             matched_points = self._stitcher.match(img, img_id)  # 0.1655s
@@ -221,8 +226,8 @@ class MainWorkflow:
             save_path is not None and
             len(save_path) > 0
         ):
-            calib_result = CalibResult(board_obj=self._stitcher.board_cfg)
-            for img_id in self._sub_image_paths.keys():
+            calib_result = CalibResult(board_obj=self._stitcher.board_obj)
+            for img_id in self._sub_image_infos.keys():
                 matched_points = self._ui.get_sub_image_matched_points(img_id)
                 for matched in matched_points:
                     calib_result.add_matched_point(matched)

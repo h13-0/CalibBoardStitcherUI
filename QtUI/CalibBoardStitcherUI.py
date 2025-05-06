@@ -297,11 +297,11 @@ class CalibBoardStitcherUI(Ui_CalibBoardStitcher, QWidget):
         """
         self._matched_points_changed_callback = callback
 
-    def set_add_new_matched_point_callback(self, callback: Callable[[str], None]):
+    def set_add_new_matched_point_callback(self, callback: Callable[[str, tuple[float, float]], None]):
         """
         设置手动添加新匹配点的回调函数
 
-        :param callback: def callback(img_id: str) -> None
+        :param callback: def callback(img_id: str, pos: tuple[float, float]) -> None
         """
         self._add_new_matched_point_callback = callback
 
@@ -488,12 +488,12 @@ class CalibBoardStitcherUI(Ui_CalibBoardStitcher, QWidget):
         if self._matched_points_changed_callback is not None:
             self._matched_points_changed_callback(img_id, matched_points)
 
-    def _add_new_matched_point(self, img_id: str):
+    def _add_new_matched_point(self, img_id: str, pos: tuple[float, float]):
         """
         手动添加新匹配点的回调函数
 
         :param img_id: 子图像ID
         """
         if self._add_new_matched_point_callback is not None:
-            self._add_new_matched_point_callback(img_id)
+            self._add_new_matched_point_callback(img_id, pos)
             self._update_sub_image_signal.emit(img_id)

@@ -109,11 +109,11 @@ class SubImage:
         """
         self._matched_point_changed_callback = callback
 
-    def set_add_new_matched_point_callback(self, callback: Callable[[str], None]):
+    def set_add_new_matched_point_callback(self, callback: Callable[[str, tuple[float, float]], None]):
         """
         设置手动添加新匹配点的回调函数
 
-        :param callback: def callback(img_id: str) -> None
+        :param callback: def callback(img_id: str, pos: tuple[float, float]) -> None
         """
         self._add_new_matched_point_callback = callback
 
@@ -152,9 +152,9 @@ class SubImage:
         if self._double_clicked_callback is not None:
             self._double_clicked_callback()
 
-    def _add_new_matched_point(self):
+    def _add_new_matched_point(self, pos: tuple[float, float]):
         if self._add_new_matched_point_callback is not None:
-            self._add_new_matched_point_callback(self.img_id)
+            self._add_new_matched_point_callback(self.img_id, pos)
 
     def _matched_point_changed(self, img_id: str, matched_points: list[MatchedPoint]) -> None:
         """
