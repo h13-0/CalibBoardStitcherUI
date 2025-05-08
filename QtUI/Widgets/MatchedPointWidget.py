@@ -9,6 +9,7 @@ class CrosshairItem(QGraphicsItem):
     def __init__(self, pos: QPointF, parent=None):
         self._item_change_callback = None
         self._item_changed_callback = None
+        self._hover_changed_callback = None
         self._item_changed = False
         super().__init__(parent)
         # 忽略视图变化
@@ -18,12 +19,16 @@ class CrosshairItem(QGraphicsItem):
 
         # 鼠标悬停功能
         self.setAcceptHoverEvents(True)
-        self._is_hovered = False
+        self._focused = False
         self.default_pen = QPen(QColor(255, 0, 0), 1)
         self.hover_pen = QPen(QColor(0, 255, 0), 1)
 
         # 启用事件监听
+        self.setFlag(QGraphicsItem.GraphicsItemFlag.ItemIsFocusable, True)
         self.setFlag(QGraphicsItem.GraphicsItemFlag.ItemSendsGeometryChanges, True)
+
+        # 键盘事件监听
+        self._is_alt_pressing = False
 
     def boundingRect(self):
         # 定义项的边界矩形
@@ -31,7 +36,7 @@ class CrosshairItem(QGraphicsItem):
 
     def paint(self, painter: QPainter, option, widget=None):
         # 绘制固定大小的十字
-        if self._is_hovered:
+        if self._focused:
             painter.setPen(self.hover_pen)
         else:
             painter.setPen(self.default_pen)
@@ -57,15 +62,50 @@ class CrosshairItem(QGraphicsItem):
         """
         self._item_changed_callback = callback
 
+    def set_hover_changed_callback(self, callback: Callable[[bool], None]):
+        """
+        设置鼠标悬停事件接受函数
+
+        :param callback: def hover_changed(hover: bool) -> None
+        """
+        self._hover_changed_callback = callback
+
+    def set_focus_status(self, focused: bool):
+        """
+        手动设置当前的focus状态
+
+        :param focused: bool
+        """
+        self._focused = focused
+        self.update()
+
     def itemChange(self, change, value):
         if(change == QGraphicsItem.GraphicsItemChange.ItemPositionChange or
             change == QGraphicsItem.GraphicsItemChange.ItemPositionHasChanged):
+            # 检测alt键是否按下
+            if self._is_alt_pressing:
+                # 启用坐标自动吸附
+                pos_x = round(value.x())
+                pos_y = round(value.y())
             # 坐标正在变化事件
             if self._item_change_callback is not None:
                 self._item_change_callback()
             self._item_changed = True
-
+            if self._is_alt_pressing:
+                return QPointF(pos_x, pos_y)
         return super().itemChange(change, value)
+
+    def keyPressEvent(self, event):
+        key = event.key()
+        if self._focused and key == Qt.Key.Key_Alt:
+            self._is_alt_pressing = True
+        super().keyPressEvent(event)
+
+    def keyReleaseEvent(self, event):
+        key = event.key()
+        if key == Qt.Key.Key_Alt:
+            self._is_alt_pressing = False
+        super().keyReleaseEvent(event)
 
     def mouseReleaseEvent(self, event):
         """
@@ -94,14 +134,19 @@ class CrosshairItem(QGraphicsItem):
         self.setFlag(QGraphicsItem.GraphicsItemFlag.ItemIsSelectable, True)
 
     def hoverEnterEvent(self, event):
-        self._is_hovered = True
+        if not self._focused and self._item_changed_callback is not None:
+            self._hover_changed_callback(True)
+        self._focused = True
         view = self.scene().views()[0]
         view.viewport().setCursor(Qt.CursorShape.ArrowCursor)
         self.update()
         super().hoverEnterEvent(event)
 
     def hoverLeaveEvent(self, event):
-        self._is_hovered = False
+        if self._focused and self._item_changed_callback is not None:
+            self._hover_changed_callback(False)
+        self._focused = False
+        self._is_alt_pressing = False
         self.update()
         super().hoverLeaveEvent(event)
 
@@ -123,17 +168,24 @@ class MatchedPointWidget(QWidget):
             parent=sub_img
         )
         self._scene = scene
+
+        line_pen = QPen(QColor(0, 153, 204), 5)
+        line_pen.setCosmetic(True)
         self.line = QGraphicsLineItem()
         self.line.setVisible(False)
-        self._update_line_pos()
+        self.line.setPen(line_pen)
+        self.line.setOpacity(0.75)
+        self.update_line_pos()
         self._scene.addItem(self.line)
 
-        self.cb_point.set_item_change_callback(self._update_line_pos)
+        self.cb_point.set_item_change_callback(self.update_line_pos)
         self.cb_point.set_item_changed_callback(self._point_changed)
+        self.cb_point.set_hover_changed_callback(self._hover_changed)
         self.cb_point.setVisible(False)
 
-        self.sub_img_point.set_item_change_callback(self._update_line_pos)
+        self.sub_img_point.set_item_change_callback(self.update_line_pos)
         self.sub_img_point.set_item_changed_callback(self._point_changed)
+        self.sub_img_point.set_hover_changed_callback(self._hover_changed)
         self.sub_img_point.setVisible(False)
 
 
@@ -166,11 +218,18 @@ class MatchedPointWidget(QWidget):
         匹配点变化的回调函数
         """
         # 先更新UI
-        self._update_line_pos()
+        self.update_line_pos()
         if self._changed_callback is not None:
             self._changed_callback()
 
-    def _update_line_pos(self):
+    def _hover_changed(self, hover: bool) -> None:
+        """
+        鼠标悬停事件回调函数
+        """
+        self.cb_point.set_focus_status(hover)
+        self.sub_img_point.set_focus_status(hover)
+
+    def update_line_pos(self):
         """
         更新线段坐标
         """
@@ -200,12 +259,11 @@ class MatchedPointWidget(QWidget):
         self.cb_point.setVisible(visible)
         self.sub_img_point.setVisible(visible)
         self.line.setVisible(visible)
+        self._scene.update()
 
     def remove(self):
         """
         删除该节点
-
-        :return:
         """
         self._scene.removeItem(self.line)
         self.cb_point.setParentItem(None)
@@ -213,4 +271,3 @@ class MatchedPointWidget(QWidget):
         self.line = None
         self.cb_point = None
         self.sub_img_point = None
-

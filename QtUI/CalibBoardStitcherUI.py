@@ -70,6 +70,7 @@ class CalibBoardStitcherUI(Ui_CalibBoardStitcher, QWidget):
         self.mainGraphicsView.setScene(self._main_scene)
         self.mainGraphicsView.wheelEvent = MethodType(self._wheel_event, self.mainGraphicsView)
         self.mainGraphicsView.setDragMode(QtWidgets.QGraphicsView.DragMode.ScrollHandDrag)
+        self.mainGraphicsView.setTransformationAnchor(QtWidgets.QGraphicsView.ViewportAnchor.NoAnchor)
         self._main_scene.addItem(self._calib_board_item)
 
         # 初始化tableWidget
@@ -244,7 +245,6 @@ class CalibBoardStitcherUI(Ui_CalibBoardStitcher, QWidget):
                 matched_points = self._sub_image_items[img_id].get_matched_points()
         return matched_points
 
-
     def update_transformed_sub_img(self, img_id: str, transformed_img: cv2.typing.MatLike):
         """
         更新变换后的子图
@@ -342,7 +342,13 @@ class CalibBoardStitcherUI(Ui_CalibBoardStitcher, QWidget):
         scale = 1 + delta / 1000.0
 
         if widget == self.mainGraphicsView:
-            widget.scale(scale, scale)
+            mouse_pos = event.position().toPoint()
+            scene_pos = self.mainGraphicsView.mapToScene(mouse_pos)
+            self.mainGraphicsView.scale(scale, scale)
+            new_pos = self.mainGraphicsView.mapToScene(mouse_pos)
+            delta_x = new_pos.x() - scene_pos.x()
+            delta_y = new_pos.y() - scene_pos.y()
+            self.mainGraphicsView.translate(delta_x, delta_y)
 
     @pyqtSlot(str)
     def _update_sub_image_slot(self, img_id:str):

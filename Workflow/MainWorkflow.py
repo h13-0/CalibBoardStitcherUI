@@ -131,19 +131,19 @@ class MainWorkflow:
         """
         matched_points = self._ui.get_sub_image_matched_points(img_id)
         if len(matched_points) > 0:
-            mean_cb_pos = (0, 0)
+            cb_pos = (0, 0)
             for point in matched_points:
-                mean_cb_pos = (
-                    mean_cb_pos[0] + point.cb_point[0],
-                    mean_cb_pos[1] + point.cb_point[1]
+                cb_pos = (
+                    cb_pos[0] + point.cb_point[0],
+                    cb_pos[1] + point.cb_point[1]
                 )
             matched_point_nums = len(matched_points)
-            mean_cb_pos = (mean_cb_pos[0] / matched_point_nums, mean_cb_pos[1] / matched_point_nums)
+            cb_pos = (cb_pos[0] / matched_point_nums, cb_pos[1] / matched_point_nums)
         else:
-            mean_cb_pos = (0, 0)
+            cb_pos = (0, 0)
         new_matched_point = MatchedPoint(
             img_id,
-            mean_cb_pos,
+            cb_pos,
             pos
         )
         matched_points.append(new_matched_point)

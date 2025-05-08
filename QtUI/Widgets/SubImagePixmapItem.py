@@ -1,7 +1,7 @@
 from typing import Callable
 
 from PyQt6.QtCore import Qt, QPointF, QPoint
-from PyQt6.QtGui import QAction
+from PyQt6.QtGui import QAction, QPen, QColor
 from PyQt6.QtWidgets import QGraphicsPixmapItem, QGraphicsScene, QMenu
 
 from CalibBoardStitcher.CalibResult import MatchedPoint
@@ -24,6 +24,9 @@ class SubImagePixmapItem(QGraphicsPixmapItem):
         self._menu_options = {}
         self._menu_pos = (0, 0)
 
+        self._focus_able = False
+        self._is_focused = False
+
     def lock(self):
         """
         锁定对象，禁止拖动
@@ -44,6 +47,12 @@ class SubImagePixmapItem(QGraphicsPixmapItem):
         for matched_point in self._matched_point_widgets:
             matched_point.unlock()
             matched_point.set_visible(True)
+
+    def set_focus_able(self, focus_able: bool):
+        """
+        设置是否响应鼠标悬停(focus)事件
+        """
+        self._focus_able = focus_able
 
     def set_double_clicked_callback(self, callback: callable):
         """
@@ -108,6 +117,12 @@ class SubImagePixmapItem(QGraphicsPixmapItem):
             self._double_clicked_callback()
         event.accept()
 
+    def itemChange(self, change, value):
+        if change == QGraphicsPixmapItem.GraphicsItemChange.ItemPositionHasChanged:
+            for matched_point in self._matched_point_widgets:
+                matched_point.update_line_pos()
+        return super().itemChange(change, value)
+
     def add_menu_options(self, option: str, callback: Callable[[tuple[float, float]], None]):
         """
         为当前PixmapItem添加右键菜单
@@ -116,7 +131,6 @@ class SubImagePixmapItem(QGraphicsPixmapItem):
         :param callback: 回调函数，原型为：def callback(pos: tuple[float, float]) -> None
         """
         self._menu_options[option] = callback
-
 
     def contextMenuEvent(self, event):
         """
@@ -139,6 +153,35 @@ class SubImagePixmapItem(QGraphicsPixmapItem):
                 menu.exec(event.screenPos())
                 event.accept()  # 标记事件已处理
 
+    def hoverEnterEvent(self, event):
+        if self._focus_able:
+            self._is_focused = True
+            self.setOpacity(0.5)
+        else:
+            self._is_focused = False
+            self.setOpacity(1)
+        super().hoverEnterEvent(event)
+
+    def hoverLeaveEvent(self, event):
+        self._is_focused = False
+        self.setOpacity(1)
+        super().hoverLeaveEvent(event)
+
+    def paint(self, painter, option, widget=None):
+        # 绘制原始图像
+        super().paint(painter, option, widget)
+
+        if self._is_focused:
+            # 绘制边框
+            painter.save()
+            pen = QPen(QColor(0, 153, 204), 5)
+            pen.setCosmetic(True)
+            pen.setJoinStyle(Qt.PenJoinStyle.MiterJoin)  # 边框拐角锐利
+            painter.setPen(pen)
+            # 获取图像的实际显示区域（考虑缩放和偏移）
+            rect = self.boundingRect()
+            painter.drawRect(rect)
+            painter.restore()
 
     def _matched_point_changed(self):
         if self._matched_point_changed_callback is not None:

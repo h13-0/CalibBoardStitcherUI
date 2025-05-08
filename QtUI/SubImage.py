@@ -38,10 +38,12 @@ class SubImage:
         self._original_draggable_pixmap_item.set_double_clicked_callback(self._double_clicked)
         self._original_draggable_pixmap_item.set_matched_point_changed_callback(self._matched_point_changed)
         self._original_draggable_pixmap_item.add_menu_options("添加匹配点", self._add_new_matched_point)
+        self._original_draggable_pixmap_item.set_focus_able(False)
 
         self._transformed_draggable_pixmap_item = SubImagePixmapItem(img_id, QPixmap())
         self._transformed_draggable_pixmap_item.set_double_clicked_callback(self._double_clicked)
         self._transformed_draggable_pixmap_item.set_matched_point_changed_callback(self._matched_point_changed)
+        self._transformed_draggable_pixmap_item.set_focus_able(True)
 
         self.enabled = False
         self._pos = pos
@@ -124,23 +126,27 @@ class SubImage:
         """
         if status == SubImageStatus.HIDE:
             self._original_draggable_pixmap_item.setVisible(False)
-            self._transformed_draggable_pixmap_item.setVisible(False)
-        elif status == SubImageStatus.SHOW_ORIGINAL_LOCKED:
-            # 设置子图可见性
-            self._original_draggable_pixmap_item.setVisible(True)
-            self._transformed_draggable_pixmap_item.setVisible(False)
-            # 设置原始图像及其MatchedPoints锁定状态
             self._original_draggable_pixmap_item.lock()
+            self._transformed_draggable_pixmap_item.setVisible(False)
+            self._transformed_draggable_pixmap_item.lock()
+        elif status == SubImageStatus.SHOW_ORIGINAL_LOCKED:
+            self._original_draggable_pixmap_item.setVisible(True)
+            self._original_draggable_pixmap_item.lock()
+            self._transformed_draggable_pixmap_item.setVisible(False)
+            self._transformed_draggable_pixmap_item.lock()
         elif status == SubImageStatus.SHOW_ORIGINAL_MOVABLE:
             self._original_draggable_pixmap_item.setVisible(True)
-            self._transformed_draggable_pixmap_item.setVisible(False)
             self._original_draggable_pixmap_item.unlock()
+            self._transformed_draggable_pixmap_item.setVisible(False)
+            self._transformed_draggable_pixmap_item.lock()
         elif status == SubImageStatus.SHOW_TRANSFORMED_LOCKED:
             self._original_draggable_pixmap_item.setVisible(False)
+            self._original_draggable_pixmap_item.lock()
             self._transformed_draggable_pixmap_item.setVisible(True)
             self._transformed_draggable_pixmap_item.lock()
         elif status == SubImageStatus.SHOW_TRANSFORMED_MOVABLE:
             self._original_draggable_pixmap_item.setVisible(False)
+            self._original_draggable_pixmap_item.lock()
             self._transformed_draggable_pixmap_item.setVisible(True)
             self._transformed_draggable_pixmap_item.unlock()
         self.status = status
