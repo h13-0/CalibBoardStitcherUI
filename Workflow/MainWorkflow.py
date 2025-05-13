@@ -166,7 +166,7 @@ class MainWorkflow:
         if source == CalibDataSource.DETECT_QR_CODE:
             self._detect_and_load_qr()
         elif source == CalibDataSource.IMPORT_FROM_FILE:
-            file_path = self._ui.select_existing_file_path("选择标定结果文件")
+            file_path = self._ui.select_existing_file_path("选择标定结果文件", filter="*.json")
             try:
                 calib_result = CalibResult.load_from_file(file_path)
                 self._stitcher = Stitcher.from_json_file(file_path)
@@ -334,7 +334,7 @@ class MainWorkflow:
             self._ui.set_progress_bar_value(int((i + 1) / len(img_ids) * 100))
 
         # 4. 执行保存操作
-        save_path = self._ui.select_save_file_path("选择图像保存路径", filter=".jpg")
+        save_path = self._ui.select_save_file_path("选择图像保存路径", filter="*.png;;*.jpg")
         if len(save_path):
             try:
                 cv2.imwrite(save_path, base_img)
@@ -399,7 +399,7 @@ class MainWorkflow:
             ButtonClickedEvent.SAVE_CALIB_RESULT_BUTTON,
             lambda : self._try_load_task(
                 lambda : self._save_matched_points(
-                    save_path=self._ui.select_save_file_path("选择保存路径", filter=".json")
+                    save_path=self._ui.select_save_file_path("选择保存路径", filter="*.json")
                 ),
                 task_name="Save calibration result task"
             )

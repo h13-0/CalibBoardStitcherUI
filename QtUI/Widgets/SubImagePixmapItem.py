@@ -18,6 +18,7 @@ class SubImagePixmapItem(QGraphicsPixmapItem):
         self.setAcceptHoverEvents(True)
         self.setAcceptedMouseButtons(Qt.MouseButton.LeftButton)
         self.setFlag(QGraphicsPixmapItem.GraphicsItemFlag.ItemSendsScenePositionChanges, True)
+        self.setToolTip(img_id)
         self._double_clicked_callback = None
         self._matched_point_widgets = []
         self._matched_point_changed_callback = None

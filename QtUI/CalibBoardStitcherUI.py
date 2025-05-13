@@ -44,7 +44,7 @@ class CalibBoardStitcherUI(Ui_CalibBoardStitcher, QWidget):
     _set_sub_image_matched_points_signal = pyqtSignal(str, list)
 
     _select_folder_signal = pyqtSignal(str, str)
-    _select_file_signal = pyqtSignal(str, str)
+    _select_file_signal = pyqtSignal(str, str, str)
     _select_save_file_signal = pyqtSignal(str, str, str)
     def __init__(self):
         Ui_CalibBoardStitcher.__init__(self)
@@ -245,8 +245,8 @@ class CalibBoardStitcherUI(Ui_CalibBoardStitcher, QWidget):
         """
         设置子图的显示状态(不影响略缩图的显示)
 
-        :param id:
-        :param status:
+        :param id: 子图像ID
+        :param status: 子图像状态
         :return:
         """
         img_item_changed = False
@@ -314,16 +314,16 @@ class CalibBoardStitcherUI(Ui_CalibBoardStitcher, QWidget):
             with self._select_folder_lock:
                 return self._selected_folder
 
-    def select_existing_file_path(self, caption: Optional[str] = '', directory: Optional[str] = '') -> str:
+    def select_existing_file_path(self, caption: Optional[str] = '', directory: Optional[str] = '', filter: Optional[str] = '') -> str:
         """
         通过UI选择文件
 
         :return: 文件路径
         """
         if threading.current_thread() == threading.main_thread():
-            return QtWidgets.QFileDialog.getOpenFileName(self, caption, directory)[0]
+            return QtWidgets.QFileDialog.getOpenFileName(self, caption, directory, filter)[0]
         else:
-            self._select_file_signal.emit(caption, directory)
+            self._select_file_signal.emit(caption, directory, filter)
             with self._select_file_lock:
                 return self._selected_file
 
@@ -487,13 +487,13 @@ class CalibBoardStitcherUI(Ui_CalibBoardStitcher, QWidget):
         with self._select_folder_lock:
             self._selected_folder = QtWidgets.QFileDialog.getExistingDirectory(self, caption, directory)
 
-    @pyqtSlot(str, str)
-    def _select_file_slot(self, caption: Optional[str] = '', directory: Optional[str] = ''):
+    @pyqtSlot(str, str, str)
+    def _select_file_slot(self, caption: Optional[str] = '', directory: Optional[str] = '', filter: Optional[str] = ''):
         """
         选择文件的槽函数
         """
         with self._select_file_lock:
-            self._selected_file = QtWidgets.QFileDialog.getOpenFileName(self, caption, directory)[0]
+            self._selected_file = QtWidgets.QFileDialog.getOpenFileName(self, caption, directory, filter)[0]
 
     @pyqtSlot(str, str, str)
     def _select_save_file_slot(self, caption: Optional[str] = '', directory: Optional[str] = '', filter: Optional[str] = ''):
@@ -506,8 +506,6 @@ class CalibBoardStitcherUI(Ui_CalibBoardStitcher, QWidget):
         """
         with self._select_save_file_lock:
             (file_name, selected_filter) = QtWidgets.QFileDialog.getSaveFileName(self, caption, directory, filter)
-            if not file_name.endswith(selected_filter):
-                file_name += selected_filter
             self._selected_save_file = file_name
 
     @pyqtSlot(QTableWidgetItem)
