@@ -189,8 +189,8 @@ class MainWorkflow:
                             self._ui.set_sub_image_status(img_id, SubImageStatus.SHOW_TRANSFORMED_LOCKED)
                             self._ui.set_matched_points_changed_callback(self._matched_point_changed)
 
-                            self._ui.set_progress_bar_value(int((i + 1) / img_nums * 100))
-                        i += 1
+                    self._ui.set_progress_bar_value(int((i + 1) / img_nums * 100))
+                    i += 1
             except Exception as e:
                 logging.error(f"Load from file {file_path} failed with msg: {str(e)}")
 
@@ -303,7 +303,7 @@ class MainWorkflow:
                 b = max(b, math.ceil(box.bottom))
         ## 2.2 实例化大图
         base_w, base_h = r - l, b - t
-        base_img = numpy.zeros(shape=(base_w, base_h, 3), dtype=numpy.uint8)
+        base_img = numpy.zeros(shape=(base_h, base_w, 3), dtype=numpy.uint8)
 
         # 3. 执行拼接
         for i in range(len(img_ids)):
@@ -342,7 +342,9 @@ class MainWorkflow:
                 logging.error(f"save image failed: {e}")
 
     def _do_task(self, task):
+        self._ui.set_progress_bar_value(0)
         task()
+        self._ui.set_progress_bar_value(100)
         self._task_mutex.release()
 
     def _try_load_task(self, task, task_name: str, wait: bool=False) -> bool:
