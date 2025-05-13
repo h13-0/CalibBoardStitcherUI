@@ -70,7 +70,7 @@
        <widget class="QTabWidget" name="funcTabView">
         <property name="minimumSize">
          <size>
-          <width>320</width>
+          <width>325</width>
           <height>0</height>
          </size>
         </property>
@@ -81,23 +81,23 @@
          </size>
         </property>
         <property name="currentIndex">
-         <number>1</number>
+         <number>0</number>
         </property>
-        <widget class="QWidget" name="tab">
+        <widget class="QWidget" name="genCalibBoardTab">
          <attribute name="title">
           <string>标定板生成</string>
          </attribute>
-         <widget class="QPushButton" name="genCalibBoardImageButton">
+         <widget class="QPushButton" name="genCalibBoardButton">
           <property name="geometry">
            <rect>
             <x>10</x>
             <y>170</y>
-            <width>295</width>
+            <width>300</width>
             <height>30</height>
            </rect>
           </property>
           <property name="text">
-           <string>生成标定板图像</string>
+           <string>生成并保存标定板图像</string>
           </property>
          </widget>
          <widget class="QLabel" name="label_3">
@@ -113,12 +113,12 @@
            <string>棋盘格列数（宽度方向）：</string>
           </property>
          </widget>
-         <widget class="QSpinBox" name="rowCountSpinBox">
+         <widget class="QSpinBox" name="genRowCountSpinBox">
           <property name="geometry">
            <rect>
             <x>220</x>
             <y>50</y>
-            <width>85</width>
+            <width>90</width>
             <height>30</height>
            </rect>
           </property>
@@ -135,12 +135,12 @@
            <number>30</number>
           </property>
          </widget>
-         <widget class="QSpinBox" name="colCountSpinBox">
+         <widget class="QSpinBox" name="genColCountSpinBox">
           <property name="geometry">
            <rect>
             <x>220</x>
             <y>10</y>
-            <width>85</width>
+            <width>90</width>
             <height>30</height>
            </rect>
           </property>
@@ -183,12 +183,12 @@
            <string>二维码边框大小：</string>
           </property>
          </widget>
-         <widget class="QSpinBox" name="qrPixelSizeSpinBox">
+         <widget class="QSpinBox" name="genQrPixelSizeSpinBox">
           <property name="geometry">
            <rect>
             <x>220</x>
             <y>90</y>
-            <width>85</width>
+            <width>90</width>
             <height>30</height>
            </rect>
           </property>
@@ -205,12 +205,12 @@
            <number>7</number>
           </property>
          </widget>
-         <widget class="QSpinBox" name="qrBoarderSpinBox">
+         <widget class="QSpinBox" name="genQrBoarderSpinBox">
           <property name="geometry">
            <rect>
             <x>220</x>
             <y>130</y>
-            <width>85</width>
+            <width>90</width>
             <height>30</height>
            </rect>
           </property>
@@ -244,16 +244,16 @@
           </property>
          </widget>
         </widget>
-        <widget class="QWidget" name="tab_2">
+        <widget class="QWidget" name="calibrationTab">
          <attribute name="title">
           <string>标定板标定</string>
          </attribute>
-         <widget class="QPushButton" name="loadSubImageSequenceButton">
+         <widget class="QPushButton" name="calibLoadSubImageSequenceButton">
           <property name="geometry">
            <rect>
             <x>210</x>
             <y>10</y>
-            <width>95</width>
+            <width>100</width>
             <height>30</height>
            </rect>
           </property>
@@ -261,7 +261,7 @@
            <string>加载子图像序列</string>
           </property>
          </widget>
-         <widget class="QLineEdit" name="subImageFolderPath">
+         <widget class="QLineEdit" name="calibSubImageFolderPath">
           <property name="enabled">
            <bool>false</bool>
           </property>
@@ -274,35 +274,35 @@
            </rect>
           </property>
          </widget>
-         <widget class="QPushButton" name="execAutoMatchButton">
+         <widget class="QPushButton" name="calibClearCalibResultButton">
           <property name="geometry">
            <rect>
             <x>10</x>
             <y>90</y>
-            <width>295</width>
+            <width>190</width>
             <height>30</height>
            </rect>
           </property>
           <property name="text">
-           <string>执行自动匹配</string>
+           <string>清除标定结果</string>
           </property>
          </widget>
-         <widget class="QComboBox" name="stitchMethodComboBox">
+         <widget class="QComboBox" name="calibStitchMethodComboBox">
           <property name="geometry">
            <rect>
             <x>10</x>
-            <y>170</y>
+            <y>130</y>
             <width>190</width>
             <height>30</height>
            </rect>
           </property>
          </widget>
-         <widget class="QPushButton" name="importCalibResultButton">
+         <widget class="QPushButton" name="calibImportCalibResultButton">
           <property name="geometry">
            <rect>
             <x>210</x>
             <y>50</y>
-            <width>95</width>
+            <width>100</width>
             <height>30</height>
            </rect>
           </property>
@@ -310,7 +310,142 @@
            <string>导入标定结果</string>
           </property>
          </widget>
-         <widget class="QLineEdit" name="lineEdit_3">
+         <widget class="QPushButton" name="importCalibResultButton">
+          <property name="geometry">
+           <rect>
+            <x>210</x>
+            <y>130</y>
+            <width>100</width>
+            <height>30</height>
+           </rect>
+          </property>
+          <property name="text">
+           <string>选定拼接方式</string>
+          </property>
+         </widget>
+         <widget class="QComboBox" name="calibDataSourceComboBox">
+          <property name="geometry">
+           <rect>
+            <x>10</x>
+            <y>50</y>
+            <width>190</width>
+            <height>30</height>
+           </rect>
+          </property>
+         </widget>
+         <widget class="QPushButton" name="calibGenCalibBoardButton">
+          <property name="geometry">
+           <rect>
+            <x>210</x>
+            <y>90</y>
+            <width>100</width>
+            <height>30</height>
+           </rect>
+          </property>
+          <property name="text">
+           <string>生成标定板图像</string>
+          </property>
+         </widget>
+         <widget class="QPushButton" name="calibSaveCalibResultButton">
+          <property name="geometry">
+           <rect>
+            <x>10</x>
+            <y>170</y>
+            <width>300</width>
+            <height>30</height>
+           </rect>
+          </property>
+          <property name="minimumSize">
+           <size>
+            <width>0</width>
+            <height>30</height>
+           </size>
+          </property>
+          <property name="text">
+           <string>保存标定结果</string>
+          </property>
+         </widget>
+        </widget>
+        <widget class="QWidget" name="stitchTab">
+         <attribute name="title">
+          <string>图像拼接验证</string>
+         </attribute>
+         <widget class="QPushButton" name="stitchGenStitchedImageButton">
+          <property name="geometry">
+           <rect>
+            <x>10</x>
+            <y>130</y>
+            <width>300</width>
+            <height>30</height>
+           </rect>
+          </property>
+          <property name="text">
+           <string>生成并保存拼接图像</string>
+          </property>
+         </widget>
+         <widget class="QPushButton" name="stitchLoadSubImageSequenceButton">
+          <property name="geometry">
+           <rect>
+            <x>210</x>
+            <y>10</y>
+            <width>100</width>
+            <height>30</height>
+           </rect>
+          </property>
+          <property name="text">
+           <string>加载子图像序列</string>
+          </property>
+         </widget>
+         <widget class="QLineEdit" name="stitchSubImageFolderPath">
+          <property name="enabled">
+           <bool>false</bool>
+          </property>
+          <property name="geometry">
+           <rect>
+            <x>10</x>
+            <y>10</y>
+            <width>190</width>
+            <height>30</height>
+           </rect>
+          </property>
+         </widget>
+         <widget class="QPushButton" name="stitchImportCalibResultButton_2">
+          <property name="geometry">
+           <rect>
+            <x>210</x>
+            <y>90</y>
+            <width>100</width>
+            <height>30</height>
+           </rect>
+          </property>
+          <property name="text">
+           <string>选定拼接方式</string>
+          </property>
+         </widget>
+         <widget class="QPushButton" name="stitchImportCalibResultButton">
+          <property name="geometry">
+           <rect>
+            <x>210</x>
+            <y>50</y>
+            <width>100</width>
+            <height>30</height>
+           </rect>
+          </property>
+          <property name="text">
+           <string>导入标定结果</string>
+          </property>
+         </widget>
+         <widget class="QComboBox" name="stitchMethodComboBox_2">
+          <property name="geometry">
+           <rect>
+            <x>10</x>
+            <y>90</y>
+            <width>190</width>
+            <height>30</height>
+           </rect>
+          </property>
+         </widget>
+         <widget class="QLineEdit" name="stitchCalibResultPath">
           <property name="enabled">
            <bool>false</bool>
           </property>
@@ -321,32 +456,6 @@
             <width>190</width>
             <height>30</height>
            </rect>
-          </property>
-         </widget>
-         <widget class="QLabel" name="label_7">
-          <property name="geometry">
-           <rect>
-            <x>10</x>
-            <y>130</y>
-            <width>295</width>
-            <height>30</height>
-           </rect>
-          </property>
-          <property name="text">
-           <string>选择拼接方式（仅影响预览，不影响自动匹配）：</string>
-          </property>
-         </widget>
-         <widget class="QPushButton" name="importCalibResultButton_2">
-          <property name="geometry">
-           <rect>
-            <x>210</x>
-            <y>170</y>
-            <width>95</width>
-            <height>30</height>
-           </rect>
-          </property>
-          <property name="text">
-           <string>更新拼接方式</string>
           </property>
          </widget>
         </widget>
@@ -418,19 +527,6 @@
          </widget>
         </item>
        </layout>
-      </item>
-      <item>
-       <widget class="QPushButton" name="saveCalibResultButton">
-        <property name="minimumSize">
-         <size>
-          <width>0</width>
-          <height>30</height>
-         </size>
-        </property>
-        <property name="text">
-         <string>保存标定结果</string>
-        </property>
-       </widget>
       </item>
      </layout>
     </item>

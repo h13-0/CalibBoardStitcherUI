@@ -1,6 +1,6 @@
 import logging
 import threading
-from enum import Enum
+from enum import Enum, unique, auto
 from types import MethodType
 from typing import Optional, Callable
 
@@ -14,13 +14,21 @@ from CalibBoardStitcher.CalibResult import MatchedPoint
 from QtUI.SubImage import SubImage, SubImageStatus
 from QtUI.Ui_CalibBoardStitcher import Ui_CalibBoardStitcher
 
-
+@unique
 class ButtonClickedEvent(Enum):
-    GEN_CALIB_BOARD_IMG_BTN_CLICKED = 1
-    LOAD_SUB_IMG_SEQ_BTN_CLICKED = 2
-    IMPORT_CALIB_RESULT_BTN_CLICKED = 3
-    EXEC_AUTO_MATCH_BTN_CLICKED = 4
-    SAVE_CALIB_RESULT_BUTTON = 5
+    GEN_AND_SAVE_CALIB_BOARD_BTN_CLICKED = auto()
+    LOAD_SUB_IMG_SEQ_BTN_CLICKED = auto()
+    IMPORT_CALIB_RESULT_BTN_CLICKED = auto()
+    CLEAR_CALIB_RESULT_BTN_CLICKED = auto()
+    GEN_CALIB_BOARD_BTN_CLICKED = auto()
+    SAVE_CALIB_RESULT_BUTTON = auto()
+    GEN_STITCHED_IMG_BTN_CLICKED = auto()
+
+@unique
+class CalibDataSource(Enum):
+    DETECT_QR_CODE = "识别二维码并导入"
+    DETECT_CEIL_BOX = "识别单元格并导入"
+    IMPORT_FROM_FILE = "从标定结果文件导入"
 
 class CalibBoardStitcherUI(Ui_CalibBoardStitcher, QWidget):
     _set_calib_board_img_signal = pyqtSignal(QImage)
@@ -36,6 +44,7 @@ class CalibBoardStitcherUI(Ui_CalibBoardStitcher, QWidget):
     _set_sub_image_matched_points_signal = pyqtSignal(str, list)
 
     _select_folder_signal = pyqtSignal(str, str)
+    _select_file_signal = pyqtSignal(str, str)
     _select_save_file_signal = pyqtSignal(str, str, str)
     def __init__(self):
         Ui_CalibBoardStitcher.__init__(self)
@@ -59,6 +68,8 @@ class CalibBoardStitcherUI(Ui_CalibBoardStitcher, QWidget):
         # 文件选择功能
         self._select_folder_lock = threading.Lock()
         self._selected_folder = None
+        self._select_file_lock = threading.Lock()
+        self._selected_file = None
         self._select_save_file_lock = threading.Lock()
         self._selected_save_file = None
 
@@ -78,21 +89,42 @@ class CalibBoardStitcherUI(Ui_CalibBoardStitcher, QWidget):
         self.tableWidget.setSortingEnabled(True)
         self.tableWidget.itemDoubleClicked.connect(self._table_widget_item_double_clicked_slot)
 
+        # 为 "导入标定结果" 左侧的ComboBox添加选项
+        for source in CalibDataSource:
+            self.calibDataSourceComboBox.addItem(source.value)
+
         # 添加按钮槽函数
-        self.genCalibBoardImageButton.clicked.connect(
-            lambda: self._btn_clicked(ButtonClickedEvent.GEN_CALIB_BOARD_IMG_BTN_CLICKED)
+        self.genCalibBoardButton.clicked.connect(
+            lambda : self._btn_clicked(ButtonClickedEvent.GEN_AND_SAVE_CALIB_BOARD_BTN_CLICKED)
         )
-        self.loadSubImageSequenceButton.clicked.connect(
-            lambda: self._btn_clicked(ButtonClickedEvent.LOAD_SUB_IMG_SEQ_BTN_CLICKED)
+        self.calibLoadSubImageSequenceButton.clicked.connect(
+            lambda : self._btn_clicked(ButtonClickedEvent.LOAD_SUB_IMG_SEQ_BTN_CLICKED)
         )
-        self.importCalibResultButton.clicked.connect(
-            lambda: self._btn_clicked(ButtonClickedEvent.IMPORT_CALIB_RESULT_BTN_CLICKED)
+        self.stitchLoadSubImageSequenceButton.clicked.connect(
+            lambda : self._btn_clicked(ButtonClickedEvent.LOAD_SUB_IMG_SEQ_BTN_CLICKED)
         )
-        self.execAutoMatchButton.clicked.connect(
-            lambda: self._btn_clicked(ButtonClickedEvent.EXEC_AUTO_MATCH_BTN_CLICKED)
+
+        self.calibImportCalibResultButton.clicked.connect(
+            lambda : self._btn_clicked(ButtonClickedEvent.IMPORT_CALIB_RESULT_BTN_CLICKED)
         )
-        self.saveCalibResultButton.clicked.connect(
-            lambda: self._btn_clicked(ButtonClickedEvent.SAVE_CALIB_RESULT_BUTTON)
+        self.stitchImportCalibResultButton.clicked.connect(
+            lambda : self._btn_clicked(ButtonClickedEvent.IMPORT_CALIB_RESULT_BTN_CLICKED)
+        )
+
+        self.calibClearCalibResultButton.clicked.connect(
+            lambda : self._btn_clicked(ButtonClickedEvent.CLEAR_CALIB_RESULT_BTN_CLICKED)
+        )
+
+        self.calibGenCalibBoardButton.clicked.connect(
+            lambda : self._btn_clicked(ButtonClickedEvent.GEN_CALIB_BOARD_BTN_CLICKED)
+        )
+
+        self.calibSaveCalibResultButton.clicked.connect(
+            lambda : self._btn_clicked(ButtonClickedEvent.SAVE_CALIB_RESULT_BUTTON)
+        )
+
+        self.stitchGenStitchedImageButton.clicked.connect(
+            lambda : self._btn_clicked(ButtonClickedEvent.GEN_STITCHED_IMG_BTN_CLICKED)
         )
 
         # 进度条修改信号
@@ -111,6 +143,7 @@ class CalibBoardStitcherUI(Ui_CalibBoardStitcher, QWidget):
 
         # 连接选择文件信号
         self._select_folder_signal.connect(self._select_folder_slot, type=Qt.ConnectionType.BlockingQueuedConnection)
+        self._select_file_signal.connect(self._select_file_slot, type=Qt.ConnectionType.BlockingQueuedConnection)
         self._select_save_file_signal.connect(self._select_save_file_slot, type=Qt.ConnectionType.BlockingQueuedConnection)
 
 
@@ -163,6 +196,17 @@ class CalibBoardStitcherUI(Ui_CalibBoardStitcher, QWidget):
         :return: 二维码边框大小
         """
         return self._get_spin_value(self.qrBoarderSpinBox)
+
+    def get_selected_calib_source(self) -> CalibDataSource:
+        """
+        获取UI中选中的标定结果数据源
+
+        :return: CalibDataSource类型数据
+        """
+        if self.funcTabView.currentIndex() == 1:
+            return CalibDataSource(self.calibDataSourceComboBox.currentText())
+        else:
+            return CalibDataSource.IMPORT_FROM_FILE
 
     def add_sub_image(self, id: str, img_path: str):
         """
@@ -269,6 +313,19 @@ class CalibBoardStitcherUI(Ui_CalibBoardStitcher, QWidget):
             self._select_folder_signal.emit(caption, directory)
             with self._select_folder_lock:
                 return self._selected_folder
+
+    def select_existing_file_path(self, caption: Optional[str] = '', directory: Optional[str] = '') -> str:
+        """
+        通过UI选择文件
+
+        :return: 文件路径
+        """
+        if threading.current_thread() == threading.main_thread():
+            return QtWidgets.QFileDialog.getOpenFileName(self, caption, directory)[0]
+        else:
+            self._select_file_signal.emit(caption, directory)
+            with self._select_file_lock:
+                return self._selected_file
 
     def select_save_file_path(self,
             caption: Optional[str] = '', directory: Optional[str] = '', filter: Optional[str] = ''
@@ -422,15 +479,21 @@ class CalibBoardStitcherUI(Ui_CalibBoardStitcher, QWidget):
                 )
         self._main_scene.update()
 
-
     @pyqtSlot(str, str)
-    def _select_folder_slot(self, caption: Optional[str] = '', directory: Optional[str] = '') -> str:
+    def _select_folder_slot(self, caption: Optional[str] = '', directory: Optional[str] = ''):
         """
         选择文件夹的槽函数
         """
         with self._select_folder_lock:
             self._selected_folder = QtWidgets.QFileDialog.getExistingDirectory(self, caption, directory)
-            self.subImageFolderPath.setText(self._selected_folder)
+
+    @pyqtSlot(str, str)
+    def _select_file_slot(self, caption: Optional[str] = '', directory: Optional[str] = ''):
+        """
+        选择文件的槽函数
+        """
+        with self._select_file_lock:
+            self._selected_file = QtWidgets.QFileDialog.getOpenFileName(self, caption, directory)[0]
 
     @pyqtSlot(str, str, str)
     def _select_save_file_slot(self, caption: Optional[str] = '', directory: Optional[str] = '', filter: Optional[str] = ''):

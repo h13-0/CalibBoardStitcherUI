@@ -1,6 +1,7 @@
 .idea
 *.pyc
 *.spec
+*.autosave
 build/
 dist/
 */__pycache__
